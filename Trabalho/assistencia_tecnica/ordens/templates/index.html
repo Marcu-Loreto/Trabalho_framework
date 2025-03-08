@@ -5,15 +5,19 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Bem-vindo ao Serviço de Assistência Técnica</h1>
-  <p>Use o Django Admin para gerenciar o CRUD de computadores.</p>
+  <h1>Bem-vindo ao Serviço de Assistência Técnica Virtal</h1>
+  <p>Trabalho final da materia de Framework da Pos em Agentes inteligentes da UFG</p>
   
-  <!-- Exemplo de formulário para suporte via LLM -->
+  <!-- Formulário para suporte via LLM -->
   <form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM">
     {% csrf_token %}
     <div class="mb-3">
+      <label for="serial" class="form-label">Número de Série:</label>
+      <input type="text" name="serial" id="serial" class="form-control" placeholder="Digite o número de série...">
+    </div>
+    <div class="mb-3">
       <label for="pergunta" class="form-label">Pergunta ao Assistente:</label>
-      <input type="text" name="pergunta" id="pergunta" class="form-control" placeholder="Digite sua questão...">
+      <input type="text" name="pergunta" id="pergunta" class="form-control" placeholder="Descreva o problema ou dúvida...">
     </div>
     <button type="submit" class="btn btn-primary">Enviar</button>
   </form>
