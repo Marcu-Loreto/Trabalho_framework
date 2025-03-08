@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Página Inicial - Assistência Técnica
+{% endblock %}
+
+{% block content %}
+  <h1>Bem-vindo ao Serviço de Assistência Técnica</h1>
+  <p>Use o Django Admin para gerenciar o CRUD de computadores.</p>
+  
+  <!-- Exemplo de formulário para suporte via LLM -->
+  <form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="pergunta" class="form-label">Pergunta ao Assistente:</label>
+      <input type="text" name="pergunta" id="pergunta" class="form-control" placeholder="Digite sua questão...">
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+  </form>
+
+  <div class="mt-3" id="resposta"></div>
+
+  <script>
+    const form = document.getElementById("formLLM");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const respostaDiv = document.getElementById("resposta");
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+        const data = await response.json();
+        if(data.resposta){
+          respostaDiv.innerHTML = `<p><strong>Resposta LLM:</strong> ${data.resposta}</p>`;
+        } else if(data.erro){
+          respostaDiv.innerHTML = `<p><strong>Erro:</strong> ${data.erro}</p>`;
+        } else {
+          respostaDiv.innerHTML = "<p>Nenhuma resposta recebida.</p>";
+        }
+      } catch (err) {
+        respostaDiv.innerHTML = `<p>Falha na requisição: ${err}</p>`;
+      }
+    });
+  </script>
+{% endblock %}
