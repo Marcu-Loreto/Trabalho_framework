@@ -81,7 +81,7 @@ def suporte_automatico(request):
 
         try:
             response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": pergunta}
@@ -89,11 +89,14 @@ def suporte_automatico(request):
                 max_tokens=300,
                 temperature=0.7
             )
-            resposta_llm = response.choices[0].message["content"]
+            resposta_llm = response.choices[0].message.content
+#resposta_llm = response.choices[0].message["content"]
             return JsonResponse({"resposta": resposta_llm})
 
         except Exception as e:
-            return JsonResponse({"erro": f"Falha na chamada OpenAI: {str(e)}"}, status=500)
+            import traceback
+            print(traceback.format_exc())  # para logar no console ou no sistema de logs
+            return JsonResponse({"erro": f"Falha na chamada OpenAI erro 500: {str(e)}"}, status=500)
 
     # Se não for POST, retorna instrução
     return JsonResponse({"info": "Use o método POST para enviar a pergunta."})
