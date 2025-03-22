@@ -33,7 +33,7 @@ def suporte_automatico(request):
         else:
             return JsonResponse({"erro": "Não foi possível obter resposta da LLM."}, status=400)
     
-    return JsonResponse({"info": "Use o método POST para enviar a pergunta."})
+    return JsonResponse({"info": "Para cadastro de computadores, use a url :http://127.0.0.1:8000/admin/ordens/computador/add/"})
 
 # ordens/views.py
 import openai
@@ -98,4 +98,4 @@ def suporte_automatico(request):
             return JsonResponse({"erro": f"Falha na chamada OpenAI erro 500: {str(e)}"}, status=500)
 
     # Se não for POST, retorna instrução
-    return JsonResponse({"info": "Use o método POST para enviar a pergunta."})
+    return JsonResponse({"info": "Para cadastro de computadores, use a url :http://127.0.0.1:8000/admin/ordens/computador/add/"})

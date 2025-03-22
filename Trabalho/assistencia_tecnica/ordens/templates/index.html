@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  Página Inicial - Assistência Técnica
+  Página Inicial - Assistência Técnica DjangoTech
 {% endblock %}
 
 {% block content %}
-  <h1>Bem-vindo a Assistência Técnica Virtual DjangoTech</h1>
-  <p>Trabalho final da matéria de Framework da Pos em Agentes inteligentes da UFG do Prof. Ronaldo</p>
+  <h1>Bem-vindo a Assistência Técnica DjangoTech</h1>
+  <p>Trabalho final da matéria de Framework da Pos em Agentes inteligentes da UFG do Prof.Ronaldo Costa</p>
   <p>Desenvolvido por: <strong>Leandro Lima, Marcu Loreto e Ricardo Kerr</strong></p>
+    
   
   <!-- Formulário para suporte via LLM -->
   <form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM">
