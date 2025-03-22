@@ -5,18 +5,16 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Bem-vindo ao Serviço de Assistência Técnica Virtal</h1>
-  <p>Trabalho final da materia de Framework da Pos em Agentes inteligentes da UFG</p>
+  <h1>Bem-vindo a Assistência Técnica Virtual DjangoTech</h1>
+  <p>Trabalho final da matéria de Framework da Pos em Agentes inteligentes da UFG do Prof. Ronaldo</p>
+  <p>Desenvolvido por: <strong>Leandro Lima, Marcu Loreto e Ricardo Kerr</strong></p>
   
   <!-- Formulário para suporte via LLM -->
   <form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM">
     {% csrf_token %}
+    
     <div class="mb-3">
-      <label for="serial" class="form-label">Número de Série:</label>
-      <input type="text" name="serial" id="serial" class="form-control" placeholder="Digite o número de série...">
-    </div>
-    <div class="mb-3">
-      <label for="pergunta" class="form-label">Pergunta ao Assistente:</label>
+      <label for="pergunta" class="form-label"><strong>Pergunta ao Assistente:</strong> Descreva o seu problema</label>
       <input type="text" name="pergunta" id="pergunta" class="form-control" placeholder="Descreva o problema ou dúvida...">
     </div>
     <button type="submit" class="btn btn-primary">Enviar</button>

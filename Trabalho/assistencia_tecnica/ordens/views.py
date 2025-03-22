@@ -63,20 +63,19 @@ def suporte_automatico(request):
         # Monta a mensagem de sistema (prompt) com base na garantia
         if garantia_dia:
             system_prompt = (
-                "Você é um atendente de assistência técnica de computadores. "
-                "O cliente possui uma máquina com garantia em dia. "
+                "Você é um atendente especializado em uma assistência técnica de computadores. "
+                "O cliente possui uma máquina com defeito que pode estar na garantia ou não em dia. "
                 "Forneça dicas de Nível 1 e também dicas de Nível 2. "
                 "As dicas de Nível 2 podem incluir procedimentos mais avançados, "
                 "diagnóstico de hardware, reinstalação de drivers, etc."
+                "Para atendimento especializado, voce vai pedir o numero de serie do computador."
+                "Por favor, informe o número de série do computador."   
             )
         else:
             system_prompt = (
-                "Você é um atendente de assistência técnica de computadores. "
-                "Forneça apenas dicas de Nível 1 (básicas), pois o cliente não "
-                "possui garantia em dia ou não foi localizado no sistema. "
-                "Não ofereça dicas de Nível 2. "
-                "As dicas de Nível 1 podem incluir: reiniciar a máquina, verificar "
-                "cabos, atualizar o sistema operacional, etc."
+                "Você é um atendente especializado em uma assistência técnica de computadores."
+                "Forneça apenas dicas de Nível 1 (básicas) e nivel 2 (avancadas) se o cliente tiver garantia em dia. Para problemas relacionados a hardware, voce deve encaminhar para a assistencia tecnica av ipiranga, numero 123 são paulo capital."
+                "Por favor, informe o número de série do computador."
             )
 
         try:
