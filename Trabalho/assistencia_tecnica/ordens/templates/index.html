@@ -5,50 +5,69 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Bem-vindo a Assistência Técnica DjangoTech</h1>
-  <p>Trabalho final da matéria de Framework da Pos em Agentes inteligentes da UFG do Prof.Ronaldo Costa</p>
-  <p>Desenvolvido por: <strong>Leandro Lima, Marcu Loreto e Ricardo Kerr</strong></p>
-    
-  
-  <!-- Formulário para suporte via LLM -->
-  <form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM">
-    {% csrf_token %}
-    
-    <div class="mb-3">
-      <label for="pergunta" class="form-label"><strong>Pergunta ao Assistente:</strong> Descreva o seu problema</label>
-      <input type="text" name="pergunta" id="pergunta" class="form-control" placeholder="Descreva o problema ou dúvida...">
-    </div>
-    <button type="submit" class="btn btn-primary">Enviar</button>
-  </form>
+  <div class="container mt-5">
+    <div class="card shadow-lg">
+      <div class="card-header text-white" style="background-color: #4267B2;">
+        <h1 class="mb-0">Bem-vindo à Assistência Técnica DjangoTech</h1>
+      </div>
+      <div class="card-body">
+        <h2 class="lead"><strong>"Pós em Agentes Inteligentes da UFG"</strong></h2>
+        <p> Matéria: Framework.</p>
+        <p>Ministrada por:   Prof.Dr. Ronaldo Costa </p>
+        <p>Desenvolvido por: <strong>Leandro Lima, Marcu Loreto e Ricardo Kerr</strong></p>
 
-  <div class="mt-3" id="resposta"></div>
+        <!-- Formulário de conversa aberta -->
+        <form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM" class="mt-4">
+          {% csrf_token %}
+          <div class="mb-3">
+              <label for="pergunta" class="form-label text-primary"><strong>Digite sua dúvida ou problema:</strong></label>
+              <textarea name="pergunta" id="pergunta" rows="3" class="form-control border-primary" placeholder="Descreva seu problema ou envie o número de série na mensagem..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" style="background-color: #4267B2; border-color: #4267B2;">Enviar</button>
+          <button type="button" id="resetChat" class="btn btn-secondary w-100 mt-2">Resetar Chat</button>
+        </form>
+
+        <div class="mt-4" id="resposta"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const form = document.getElementById("formLLM");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const respostaDiv = document.getElementById("resposta");
+    const respostaDiv = document.getElementById("resposta");
+    const resetBtn = document.getElementById("resetChat");
 
-      try {
-        const response = await fetch(form.action, {
-          method: "POST",
-          body: formData,
-          headers: {
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        });
-        const data = await response.json();
-        if(data.resposta){
-          respostaDiv.innerHTML = `<p><strong>Resposta LLM:</strong> ${data.resposta}</p>`;
-        } else if(data.erro){
-          respostaDiv.innerHTML = `<p><strong>Erro:</strong> ${data.erro}</p>`;
-        } else {
-          respostaDiv.innerHTML = "<p>Nenhuma resposta recebida.</p>";
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            const data = await response.json();
+
+            if (data.resposta) {
+                respostaDiv.innerHTML = `<div class="alert alert-info"><strong>Assistente:</strong> ${data.resposta}</div>`;
+                document.getElementById("pergunta").value = '';
+            } else if (data.erro) {
+                respostaDiv.innerHTML = `<div class="alert alert-danger"><strong>Erro:</strong> ${data.erro}</div>`;
+            } else {
+                respostaDiv.innerHTML = "<div class='alert alert-warning'>Nenhuma resposta recebida.</div>";
+            }
+        } catch (err) {
+            respostaDiv.innerHTML = `<div class="alert alert-danger">Falha na requisição: ${err}</div>`;
         }
-      } catch (err) {
-        respostaDiv.innerHTML = `<p>Falha na requisição: ${err}</p>`;
-      }
+    });
+
+    // Reset do chat (limpa a interface)
+    resetBtn.addEventListener("click", () => {
+        respostaDiv.innerHTML = '';
+        form.reset();
     });
   </script>
 {% endblock %}

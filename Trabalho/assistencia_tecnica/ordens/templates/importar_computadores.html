@@ -1,0 +1,14 @@
+<form action="{% url 'suporte_automatico' %}" method="POST" id="formLLM" class="mt-4">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="serial" class="form-label text-primary"><strong>Número de Série:</strong></label>
+        <input type="text" name="serial" id="serial" class="form-control border-primary" placeholder="Informe o número de série" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="pergunta" class="form-label text-primary"><strong>Descreva o problema ou dúvida:</strong></label>
+        <input type="text" name="pergunta" id="pergunta" class="form-control border-primary" placeholder="Descreva o problema ou dúvida..." required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100" style="background-color: #4267B2; border-color: #4267B2;">Enviar</button>
+    <button type="button" id="resetChat" class="btn btn-secondary w-100 mt-2">Resetar Chat</button>
+</form>

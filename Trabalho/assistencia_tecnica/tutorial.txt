@@ -1,0 +1,109 @@
+Tutorial do Administrador - Sistema de Atendimento DjangoTech
+
+Visão Geral
+
+O DjangoTech é um sistema de assistência técnica desenvolvido para atendimento de clientes com suporte básico e avançado, integrando um assistente virtual (LLM) e uma base de dados de computadores.
+
+Funções principais para o Administrador
+
+1. Acesso ao Sistema
+
+URL do sistema: http://127.0.0.1:8000/admin/
+
+Insira seu usuário e senha cadastrados.
+
+2. Gerenciamento de Computadores
+
+No menu lateral, acesse a seção ORDENS > Computadores.
+
+Aqui você pode:
+
+Adicionar novos computadores
+
+Editar dados existentes (modelo, número de série, data de garantia, etc.)
+
+Excluir registros obsoletos
+
+3. Importação e Exportação de CSV
+
+O sistema permite importar e exportar dados de computadores via arquivos CSV.
+
+Exportar Dados
+
+Na tela de listagem de computadores, clique em Export CSV.
+
+O sistema gera automaticamente um arquivo computadores.csv com todos os registros atuais.
+
+Importar Dados
+
+Na tela de listagem de computadores, clique em Import CSV.
+
+Selecione um arquivo .csv formatado corretamente.
+
+O sistema importará os dados e atualizará registros existentes ou criará novos.
+
+4. Formato do CSV esperado
+
+numero_serie
+
+modelo
+
+ano_fabricacao
+
+tempo_garantia
+
+data_vigencia_garantia
+
+SN-12345
+
+Dell Inspiron
+
+2022
+
+12 meses
+
+2024-12-30
+
+SN-67890
+
+HP ProBook
+
+2021
+
+24 meses
+
+2024-11-15
+
+numero_serie: Formato livre, mas comúnmente SN-XXXXX
+
+data_vigencia_garantia: Formato YYYY-MM-DD
+
+5. Atendimento via Assistente Virtual (LLM)
+
+O cliente acessa a página inicial do sistema.
+
+Ele enviará mensagens livres ao assistente.
+
+O sistema automaticamente identifica o número de série (ex: SN-12345) mencionado na conversa.
+
+A LLM responderá considerando o status de garantia do computador.
+
+6. Funcionalidades de Sessão
+
+O sistema guarda até 5 mensagens anteriores para manter contexto.
+
+O cliente pode resetar a conversa a qualquer momento.
+
+7. Observações
+
+A LLM irá solicitar o número de série caso o cliente esqueça.
+
+Toda a validação de garantia é feita automaticamente via backend.
+
+Dicas de Administração
+
+Sempre mantenha o banco de computadores atualizado.
+
+Certifique-se que as datas de vigência da garantia estejam corretas.
+
+Realize exportações periódicas como backup.

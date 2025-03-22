@@ -16,10 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+#from ordens.views import index, suporte_automatico
+from ordens import views
 from ordens.views import index, suporte_automatico
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
     path('suporte/', suporte_automatico, name='suporte_automatico'),
+    path('computadores/importar/', views.importar_computadores, name='importar_computadores'),
+    path('computadores/exportar/', views.exportar_computadores, name='exportar_computadores'),
+
 ]

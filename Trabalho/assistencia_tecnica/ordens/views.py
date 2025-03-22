@@ -1,101 +1,114 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import requests
+import openai
+from datetime import date, datetime
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
+from django.shortcuts import render
+from .models import Computador
+import csv
+from django.contrib import messages
+import pandas as pd
+import re
 
 def index(request):
     return render(request, 'index.html')
 
-def suporte_automatico(request):
-    """
-    Exemplo de chamada a uma API de LLM já treinada.
-    """
-    if request.method == 'POST':
-        pergunta = request.POST.get('pergunta')
-        
-        # Exemplo genérico de chamada a uma API
-        # Ajuste a URL e parâmetros para a API real
-        api_url = "https://api.minha-llm.com/chat"
-        payload = {
-            "prompt": pergunta,
-            "max_tokens": 100
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer SEU_TOKEN_DE_API"
-        }
-        
-        response = requests.post(api_url, json=payload, headers=headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            resposta_llm = data.get('answer', 'Sem resposta da LLM.')
-            return JsonResponse({"resposta": resposta_llm})
-        else:
-            return JsonResponse({"erro": "Não foi possível obter resposta da LLM."}, status=400)
-    
-    return JsonResponse({"info": "Para cadastro de computadores, use a url :http://127.0.0.1:8000/admin/ordens/computador/add/"})
-
 # ordens/views.py
-import openai
-from datetime import date
-from django.http import JsonResponse
-from django.conf import settings
-from django.shortcuts import render
-from .models import Computador
+
+def importar_computadores(request):
+    if request.method == 'POST':
+        csv_file = request.FILES.get('csv_file')
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, 'O arquivo enviado não é um CSV válido.')
+            return redirect('importar_computadores')
+
+        df = pd.read_csv(csv_file)
+
+        for _, row in df.iterrows():
+            try:
+                computador, created = Computador.objects.update_or_create(
+                    numero_serie=row['numero_serie'],
+                    defaults={
+                        'modelo': row['modelo'],
+                        'ano_fabricacao': int(row['ano_fabricacao']),
+                        'tempo_garantia': row['tempo_garantia'],
+                        'data_vigencia_garantia': pd.to_datetime(row['data_vigencia_garantia']).date()
+                    }
+                )
+            except Exception as e:
+                messages.error(request, f'Erro ao importar linha: {row.to_dict()}. Erro: {e}')
+                continue
+
+        messages.success(request, 'Importação concluída com sucesso.')
+        return redirect('importar_computadores')
+
+    return render(request, 'importar_computadores.html')
+
+def exportar_computadores(request):
+    queryset = Computador.objects.all().values(
+        'numero_serie', 'modelo', 'ano_fabricacao', 'tempo_garantia', 'data_vigencia_garantia'
+    )
+    df = pd.DataFrame(list(queryset))
+    df['data_vigencia_garantia'] = df['data_vigencia_garantia'].dt.strftime('%Y-%m-%d')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="computadores.csv"'
+    df.to_csv(path_or_buf=response, index=False)
+
+    return response
+
+import re
 
 def suporte_automatico(request):
     if request.method == 'POST':
-        pergunta = request.POST.get('pergunta', '')
-        serial = request.POST.get('serial', '')
-
-        # Configure a chave da API
+        mensagem = request.POST.get('pergunta', '').strip()
         openai.api_key = settings.OPENAI_API_KEY
 
-        # Verifica se o computador com esse número de série existe
-        computador = Computador.objects.filter(numero_serie=serial).first()
+        # Tenta extrair o número de série do texto
+        serial_match = re.search(r'(SN-[\w\d-]+)', mensagem, re.IGNORECASE)
+        serial = serial_match.group(1) if serial_match else None
 
-        # Define se o cliente tem garantia em dia
-        garantia_dia = False
-        if computador:
-            if computador.data_vigencia_garantia >= date.today():
-                garantia_dia = True
+        garantia_msg = "O cliente ainda não forneceu um número de série válido."
+        computador = None
 
-        # Monta a mensagem de sistema (prompt) com base na garantia
-        if garantia_dia:
-            system_prompt = (
-                "Você é um atendente especializado em uma assistência técnica de computadores. "
-                "O cliente possui uma máquina com defeito que pode estar na garantia ou não em dia. "
-                "Forneça dicas de Nível 1 e também dicas de Nível 2. "
-                "As dicas de Nível 2 podem incluir procedimentos mais avançados, "
-                "diagnóstico de hardware, reinstalação de drivers, etc."
-                "Para atendimento especializado, voce vai pedir o numero de serie do computador."
-                "Por favor, informe o número de série do computador."   
-            )
-        else:
-            system_prompt = (
-                "Você é um atendente especializado em uma assistência técnica de computadores."
-                "Forneça apenas dicas de Nível 1 (básicas) e nivel 2 (avancadas) se o cliente tiver garantia em dia. Para problemas relacionados a hardware, voce deve encaminhar para a assistencia tecnica av ipiranga, numero 123 são paulo capital."
-                "Por favor, informe o número de série do computador."
-            )
+        if serial:
+            computador = Computador.objects.filter(numero_serie=serial).first()
+            if computador:
+                if computador.data_vigencia_garantia >= date.today():
+                    garantia_msg = f"O cliente informou o número de série {serial}. O computador está EM GARANTIA até {computador.data_vigencia_garantia.strftime('%d/%m/%Y')}."
+                else:
+                    garantia_msg = f"O cliente informou o número de série {serial}. O computador está FORA DA GARANTIA desde {computador.data_vigencia_garantia.strftime('%d/%m/%Y')}."
+            else:
+                garantia_msg = f"O número de série {serial} não foi encontrado no sistema."
+
+        # System prompt com status da garantia contextualizado
+        system_prompt = (
+            "Você é um atendente virtual de suporte técnico e é especializado em computadores e dispositivos móveis. "
+            "sua missão é ajudar o cliente a resolver problemas técnicos e fornecer informações sobre garantia do computador e forneceder detalhes sobre envio do computador para a empresa. "
+            "O cliente forneceu o seguinte: numero de serie e não esta em garantia. Voce deve orienta-lo a enviar o copmputador ao escritorio da empresa para realizar uma avaliaçao e orçamento. "	
+            f"{garantia_msg} "
+            "Se não tiver o número de série ou se precisar de mais informações, solicite ao cliente de maneira cordial."
+        )
 
         try:
             response = openai.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": pergunta}
+                    {"role": "user", "content": mensagem}
                 ],
                 max_tokens=300,
                 temperature=0.7
             )
             resposta_llm = response.choices[0].message.content
-#resposta_llm = response.choices[0].message["content"]
+
             return JsonResponse({"resposta": resposta_llm})
 
         except Exception as e:
             import traceback
-            print(traceback.format_exc())  # para logar no console ou no sistema de logs
+            print(traceback.format_exc())
             return JsonResponse({"erro": f"Falha na chamada OpenAI erro 500: {str(e)}"}, status=500)
 
-    # Se não for POST, retorna instrução
-    return JsonResponse({"info": "Para cadastro de computadores, use a url :http://127.0.0.1:8000/admin/ordens/computador/add/"})
+    return JsonResponse({"info": "Envie sua mensagem para o assistente."})

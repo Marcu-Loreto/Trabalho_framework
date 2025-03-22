@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h2>Importar Computadores via CSV</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+      <input type="file" name="csv_file" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Importar CSV</button>
+    <a href=".." class="btn btn-secondary">Voltar</a>
+  </form>
+{% endblock %}
